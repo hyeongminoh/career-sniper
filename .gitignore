@@ -1,0 +1,100 @@
+# =========================================================
+# 민감 정보 / 절대 커밋 금지 (Secrets — never commit)
+# =========================================================
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+*.pem
+*.key
+*.crt
+*.p12
+credentials.json
+token.json
+
+# =========================================================
+# 개인정보 (Personal data — 이력서, 수집/분석 결과물)
+# =========================================================
+# 실제 이력서 파일. .gitkeep만 추적, 나머지는 제외.
+resume/*
+!resume/.gitkeep
+
+# 크롤링한 JD 원문 및 이력서 갭 분석 결과가 담긴 SQLite DB.
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+data/*.sqlite3-journal
+!data/.gitkeep
+
+# =========================================================
+# Python
+# =========================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- 가상환경 ---
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# --- 테스트 / 린트 / 타입체커 캐시 ---
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# =========================================================
+# Playwright (크롤링 시 생성되는 디버그 산출물)
+# =========================================================
+playwright-report/
+test-results/
+**/trace.zip
+
+# =========================================================
+# 로그
+# =========================================================
+*.log
+logs/
+
+# =========================================================
+# IDE / 에디터
+# =========================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# Claude Code 로컬 설정 (개인 권한 허용 목록 등, 팀 공유 대상 아님)
+.claude/settings.local.json
+
+# =========================================================
+# OS
+# =========================================================
+.DS_Store
+Thumbs.db
+desktop.ini
