@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import sys
 
-from config.settings import DEFAULT_TARGET_COMPANIES, RESUME_FILE_PATH
+from config.settings import DEFAULT_TARGET_COMPANIES, JOB_SEARCH_KEYWORDS, RESUME_FILE_PATH
 from db.database import get_session, init_db
 from db.repository import save_resume_snapshot
 from graph.workflow import build_workflow
@@ -30,6 +30,7 @@ def main() -> int:
     workflow = build_workflow()
     initial_state = {
         "target_companies": DEFAULT_TARGET_COMPANIES,
+        "target_keywords": JOB_SEARCH_KEYWORDS,
         "resume_text": resume_text,
         "job_postings": [],
         "jd_analyses": [],

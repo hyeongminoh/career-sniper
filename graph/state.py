@@ -62,6 +62,7 @@ class AgentState(TypedDict):
 
     # -- input / config, set once up front --
     target_companies: List[str]
+    target_keywords: List[str]
     resume_text: str
 
     # -- accumulated across (possibly parallel) node runs --

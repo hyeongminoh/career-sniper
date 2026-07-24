@@ -32,6 +32,7 @@ def crawler_agent(state: AgentState) -> dict:
     and returns the postings/errors for the rest of the graph to consume.
     """
     target_companies = state.get("target_companies") or list(CRAWLERS_BY_COMPANY.keys())
+    keywords = state.get("target_keywords") or JOB_SEARCH_KEYWORDS
 
     all_postings: List[JobPosting] = []
     all_errors: List[str] = []
@@ -43,7 +44,7 @@ def crawler_agent(state: AgentState) -> dict:
             continue
 
         crawler = crawler_cls()
-        postings, errors = crawler.safe_crawl(keywords=JOB_SEARCH_KEYWORDS)
+        postings, errors = crawler.safe_crawl(keywords=keywords)
         all_postings.extend(postings)
         all_errors.extend(errors)
 

@@ -17,11 +17,15 @@ ANTHROPIC_MODEL: str = os.getenv("ANTHROPIC_MODEL", "claude-opus-4-8")
 DEFAULT_TARGET_COMPANIES: List[str] = ["Anthropic", "Google", "Salesforce", "Palantir", "OpenAI"]
 
 
-def _parse_csv(raw: str) -> List[str]:
+def parse_csv(raw: str) -> List[str]:
+    """Splits a comma-separated string into a trimmed, non-empty list of items.
+    Shared with ui/app.py so the keyword text input parses the same way as this default."""
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
-JOB_SEARCH_KEYWORDS: List[str] = _parse_csv(
+# Default job search keywords, used by the CLI (main.py) and as the Streamlit UI's
+# pre-filled value — the UI lets the keywords be edited per run instead of only via .env.
+JOB_SEARCH_KEYWORDS: List[str] = parse_csv(
     os.getenv("JOB_SEARCH_KEYWORDS", "Software Engineer,Machine Learning Engineer,Product Manager")
 )
 

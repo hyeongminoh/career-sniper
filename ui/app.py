@@ -12,11 +12,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import streamlit as st
 
-from config.settings import DEFAULT_TARGET_COMPANIES, RESUME_FILE_PATH
+from config.settings import DEFAULT_TARGET_COMPANIES, JOB_SEARCH_KEYWORDS, parse_csv
 from db.database import get_session, init_db
 from db.repository import get_all_postings_with_analysis, save_resume_snapshot
 from graph.workflow import build_workflow
-from resume_loader import ResumeLoadError, load_resume_text
+from resume_loader import ResumeLoadError, parse_resume_stream
 
 logging.basicConfig(level=logging.INFO)
 
@@ -24,25 +24,52 @@ st.set_page_config(page_title="Career Sniper", layout="wide")
 init_db()
 
 st.title("Career Sniper")
-st.caption("Anthropic · Google · Salesforce · Palantir · OpenAI JD 분석 및 이력서 매칭")
+st.caption("외국계 JD 분석")
 
 with st.sidebar:
+    st.header("이력서")
+    uploaded_resume = st.file_uploader("이력서 업로드", type=["pdf", "docx", "txt"])
+
+    if uploaded_resume is not None:
+        # Widget state persists across reruns, so this block re-runs on every unrelated
+        # interaction (e.g. changing the company multiselect) — only re-parse when the
+        # uploaded file actually changed, instead of on every rerun.
+        if st.session_state.get("resume_file_id") != uploaded_resume.file_id:
+            try:
+                resume_text = parse_resume_stream(uploaded_resume, uploaded_resume.name)
+            except ResumeLoadError as exc:
+                st.error(str(exc))
+            else:
+                st.session_state["resume_text"] = resume_text
+                st.session_state["resume_filename"] = uploaded_resume.name
+                st.session_state["resume_file_id"] = uploaded_resume.file_id
+                st.success(f"'{uploaded_resume.name}' 업로드 완료 ({len(resume_text)}자)")
+        else:
+            st.caption(f"현재 이력서: {st.session_state.get('resume_filename')}")
+
     st.header("실행")
     companies = st.multiselect("크롤링할 회사", DEFAULT_TARGET_COMPANIES, default=DEFAULT_TARGET_COMPANIES)
+    keywords_input = st.text_input(
+        "검색 키워드 (쉼표로 구분)",
+        value=", ".join(JOB_SEARCH_KEYWORDS),
+        help="공고 제목에 이 키워드 중 하나라도 포함돼야 결과에 포함됩니다.",
+    )
     run_button = st.button("크롤링 + 분석 실행", type="primary")
 
     if run_button:
-        try:
-            resume_text = load_resume_text(RESUME_FILE_PATH)
-        except ResumeLoadError as exc:
-            st.error(str(exc))
+        resume_text = st.session_state.get("resume_text")
+        if not resume_text:
+            st.error("먼저 이력서를 업로드해주세요.")
         else:
+            keywords = parse_csv(keywords_input)
+            resume_filename = st.session_state.get("resume_filename", "unknown")
             with get_session() as session:
-                save_resume_snapshot(session, RESUME_FILE_PATH, resume_text)
+                save_resume_snapshot(session, f"upload:{resume_filename}", resume_text)
 
             workflow = build_workflow()
             initial_state = {
                 "target_companies": companies,
+                "target_keywords": keywords,
                 "resume_text": resume_text,
                 "job_postings": [],
                 "jd_analyses": [],
